@@ -39,7 +39,6 @@ class  EntityRepository {
         $q = $this->getDb()->query("SELECT * FROM " . $this->table);
         $r = $q->fetchAll(\PDO::FETCH_ASSOC);
         $q2 = $this->getDb()->query("SELECT COUNT(id_annuaire) as c, sexe FROM annuaire GROUP BY sexe");
-        echo "SELECT COUNT(id_annuaire), sexe FROM annuaire GROUP BY sexe" . $this->table;
         $r2 = $q2->fetchAll(\PDO::FETCH_ASSOC);
         return [$r, $r2];
     }
@@ -52,20 +51,7 @@ class  EntityRepository {
 
     public function save() {
         $id = isset($_GET['id']) ? $_GET['id'] : 'NULL';
-        $q = $this->getDb()->query(
-            'REPLACE INTO ' . $this->table . ' (id' . ucfirst($this->table) .
-            ',' . implode(',', array_keys($_POST)).' ) VALUES (' .
-            $id . ','. "'" . implode("','", $_POST)."'".')'
-        );
-        //$r = $q->fetchAll(\PDO::FETCH_ASSOC);
-
-        return $this->getDb()->lastInsertId();
-    }
-
-    public function saveRep() {
-        $id = isset($_GET['id']) ? $_GET['id'] : 'NULL';
         $req = 'REPLACE INTO annuaire (id_annuaire,' . implode(',', array_keys($_POST)).' ) VALUES (' . $id . ','. "'" . implode("','", $_POST)."'".')';
-        echo $req;
         $q = $this->getDb()->exec($req);
 
 

@@ -10,12 +10,12 @@ class Controller {
         $this->db = new \model\EntityRepository;
     }
 
+
+    // Gère les requêtes provenant de affichage_annuaire.php
     public function handlerRequest() {
         $op = isset($_GET['op']) ? $_GET['op'] : null;
         try {
-            if ($op == 'add' || $op == 'update') $this->save($op);
-            elseif ($op == 'select') $this->select();
-            elseif ($op == 'confirmDelete') $this->confirmDelete();
+            if ($op == 'confirmDelete') $this->confirmDelete();
             elseif ($op == 'delete') $this->delete();
             else $this->selectAll();
         } catch (\Exception $e) {
@@ -23,11 +23,13 @@ class Controller {
         }
     }
 
+    // Gère les requêtes provenant de repertoire.php
     public function manageRepertoire() {
         $op = isset($_GET['op']) ? $_GET['op'] : null;
-        $this->saveRep($op);
+        $this->save($op);
     }
 
+    // Gestion de la vue
     public function render($layout, $template, $parameters = []) {
         extract($parameters);
         ob_start();
@@ -38,24 +40,25 @@ class Controller {
         return ob_end_flush();
     }
 
+    // Récupère et affiche l'ensemble des entrées du répertoire
     public function selectAll() {
-        /*echo "On affiche tout";*/
+
         $result = $this->db->selectAll();
-        $r = $result[0];
-        $r2 = $result[1];
+        $donnees = $result[0];
 
-
-        $count = $this->countByGender($r2);
+        // Récupère le nombre d'hommes et de femmes
+        $count = $this->countByGender($result[1]);
 
         $this->render('layout.php', 'donnees.php', array(
             'title' => 'Toutes les données',
-            'donnees' =>$r,
+            'donnees' =>$donnees,
             'fields' => $this->db->getFields(),
             'id' => 'id_'.$this->db->table,
             'count' => $count
         ));
     }
 
+    // Permet d'isoler dans un tableau le nombre d'hommes et de femmes
     public function countByGender($result) {
         $count = ['m' => 0, 'f' => 0];
         foreach ($result as $sexe) {
@@ -64,47 +67,32 @@ class Controller {
         return $count;
     }
 
+    // Gestion de l'ajout et de l'édition de contacts
     public function save($op) {
-        $title = $op;
-        $id = isset($_GET['id']) ? $_GET['id'] : null;
-        if ($_POST) {
-            $r = $this->db->save();
-        }
-        $this->render('layout.php', 'donnees-form.php', [
-            'title' => "Données : $title",
-            'op' => $op,
-            'fields' => $this->db->getFields()
-        ]);
-    }
-
-    public function saveRep($op) {
         $title = "Ajouter un contact";
         $id = isset($_GET['id']) ? $_GET['id'] : null;
         $entry = false;
 
+        // Traitement si formulaire s'il a été soumis
         if ($_POST) {
-            $r = $this->db->saveRep();
+            $r = $this->db->save();
         }
 
+        // Récupération des données à éditer si nécessaire
         if ($id != null) {
             $title = "Modifier un contact";
             $entry = $this->db->selectById($id);
         }
 
-
-        $this->render('layout.php', 'saveRep.php', [
-            'title' => "Ajouter un contact",
+        $this->render('layout.php', 'entry-form.php', [
+            'title' => $title,
             'op' => $op,
             'entry' => $entry
-        //'fields' => $this->db->getFields()
         ]);
 
     }
 
-    public function select() {
-        echo "select";
-    }
-
+    // Page de confirmation pour la suppression
     public function confirmDelete() {
         $id = isset($_GET['id']) ? $_GET['id'] : null;
         $title = "Suppression";
@@ -115,6 +103,7 @@ class Controller {
         ]);
     }
 
+    // Suppression d'une entrée
     public function delete() {
         $id = isset($_GET['id']) ? $_GET['id'] : null;
 
