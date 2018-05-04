@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<config>
+    <host>localhost</host>
+    <user>root</user>
+    <password></password>
+    <db>repertoire</db>
+    <table>annuaire</table>
+</config>
